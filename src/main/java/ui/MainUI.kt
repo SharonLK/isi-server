@@ -16,6 +16,12 @@ fun main(args: Array<String>) {
 class Screen : App(HelloWorld::class, InternalWindow.Styles::class) {
     override fun start(stage: Stage) {
         super.start(stage)
+
+        stage.width = 1280.0
+        stage.height = 720.0
+
+        stage.show()
+        stage.isMaximized = true
     }
 }
 
@@ -36,38 +42,39 @@ class HelloWorld : View() {
 
             label("Simple Echo") {
                 style {
-                    fontSize = Dimension(3.0, Dimension.LinearUnits.em)
+                    fontSize = Dimension(4.0, Dimension.LinearUnits.em)
                     fontWeight = FontWeight.BOLD
+                    textFill = c("#282828")
                 }
             }
 
             label("http://127.0.0.1:8080/function/simple-echo") {
                 style {
+                    fontSize = Dimension(1.5, Dimension.LinearUnits.em)
                     fontStyle = FontPosture.ITALIC
+                    textFill = c("#58564C")
                 }
             }
 
-            separator(Orientation.HORIZONTAL) {
-                paddingProperty().set(Insets(0.0, 10.0, 0.0, 10.0))
-            }
+            separator(Orientation.HORIZONTAL)
 
             textarea("def handler(st):\n\tprint(\"Hello World\")\n\n") {
                 maxHeightProperty().set(Double.MAX_VALUE)
                 maxWidthProperty().set(Double.MAX_VALUE)
                 vgrow = Priority.ALWAYS
+                font = Font.font("monospace", 16.0)
             }
 
-            separator(Orientation.HORIZONTAL) {
-                paddingProperty().set(Insets(0.0, 10.0, 0.0, 10.0))
-            }
+            separator(Orientation.HORIZONTAL)
 
             hbox {
                 spacingProperty().set(20.0)
 
                 button("Download") {
-                    prefHeightProperty().set(40.0)
-                    prefWidthProperty().set(100.0)
+                    prefHeightProperty().set(60.0)
+                    prefWidthProperty().set(150.0)
                     style {
+                        fontSize = Dimension(1.5, Dimension.LinearUnits.em)
                         backgroundColor += c("#79B0C0")
                         textFill = c("#FFFFFF")
                         fontWeight = FontWeight.BOLD
@@ -75,9 +82,10 @@ class HelloWorld : View() {
                 }
 
                 button("Re-submit") {
-                    prefHeightProperty().set(40.0)
-                    prefWidthProperty().set(100.0)
+                    prefHeightProperty().set(60.0)
+                    prefWidthProperty().set(150.0)
                     style {
+                        fontSize = Dimension(1.5, Dimension.LinearUnits.em)
                         backgroundColor += c("#7EAB75")
                         textFill = c("#FFFFFF")
                         fontWeight = FontWeight.BOLD
@@ -89,9 +97,10 @@ class HelloWorld : View() {
                 }
 
                 button("Remove") {
-                    prefHeightProperty().set(40.0)
-                    prefWidthProperty().set(100.0)
+                    prefHeightProperty().set(60.0)
+                    prefWidthProperty().set(150.0)
                     style {
+                        fontSize = Dimension(1.5, Dimension.LinearUnits.em)
                         backgroundColor += c("#AE4338")
                         textFill = c("#FFFFFF")
                         fontWeight = FontWeight.BOLD
