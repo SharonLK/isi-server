@@ -40,20 +40,23 @@ class HelloWorld : View() {
                     fontWeight = FontWeight.BOLD
                 }
             }
+
             label("http://127.0.0.1:8080/function/simple-echo") {
                 style {
                     fontStyle = FontPosture.ITALIC
                 }
             }
+
             separator(Orientation.HORIZONTAL) {
                 paddingProperty().set(Insets(0.0, 10.0, 0.0, 10.0))
             }
+
             textarea("def handler(st):\n\tprint(\"Hello World\")\n\n") {
                 maxHeightProperty().set(Double.MAX_VALUE)
                 maxWidthProperty().set(Double.MAX_VALUE)
                 vgrow = Priority.ALWAYS
-                font = Font.font("Verdana")
             }
+
             separator(Orientation.HORIZONTAL) {
                 paddingProperty().set(Insets(0.0, 10.0, 0.0, 10.0))
             }
@@ -70,6 +73,21 @@ class HelloWorld : View() {
                         fontWeight = FontWeight.BOLD
                     }
                 }
+
+                button("Re-submit") {
+                    prefHeightProperty().set(40.0)
+                    prefWidthProperty().set(100.0)
+                    style {
+                        backgroundColor += c("#7EAB75")
+                        textFill = c("#FFFFFF")
+                        fontWeight = FontWeight.BOLD
+                    }
+                }
+
+                pane {
+                    hgrow = Priority.ALWAYS
+                }
+
                 button("Remove") {
                     prefHeightProperty().set(40.0)
                     prefWidthProperty().set(100.0)
