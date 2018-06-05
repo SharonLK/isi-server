@@ -1,8 +1,8 @@
 package server
 
+import com.sun.net.httpserver.HttpServer
 import org.apache.commons.io.IOUtils
-import java.io.PrintWriter
-import java.net.ServerSocket
+import java.net.InetSocketAddress
 
 fun main(args: Array<String>) {
     Communicator().start()
@@ -16,18 +16,15 @@ class Communicator {
     fun start() {
         val data = IOUtils.toString(this.javaClass.classLoader.getResource("dummy_data.json"))
 
-        val listener = ServerSocket(9091)
-        println("Listening on port 9091")
+        val server = HttpServer.create(InetSocketAddress(9091), 0)
+        server.createContext("/", { exchange ->
+            exchange.sendResponseHeaders(200, data.length.toLong())
+            val body = exchange.responseBody
+            body.write(data.toByteArray())
+            body.close()
+        })
 
-        while (true) {
-            val socket = listener.accept()
-            println("New client found: ${socket.inetAddress}")
-
-            val out = PrintWriter(socket.getOutputStream(), true)
-            out.println(data)
-
-            socket.close()
-            println("Socket closed")
-        }
+        server.executor = null
+        server.start()
     }
 }
