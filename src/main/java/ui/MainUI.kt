@@ -1,9 +1,9 @@
 package ui
 
+import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Insets
 import javafx.geometry.Orientation
 import javafx.scene.layout.Priority
-import javafx.scene.text.Font
 import javafx.scene.text.FontPosture
 import javafx.scene.text.FontWeight
 import javafx.stage.Stage
@@ -26,6 +26,9 @@ class Screen : App(HelloWorld::class, InternalWindow.Styles::class) {
 }
 
 class HelloWorld : View() {
+    private val controller: MainUIController by inject()
+    private val function = SimpleStringProperty()
+
     override val root = hbox {
         spacingProperty().set(20.0)
 
@@ -37,6 +40,12 @@ class HelloWorld : View() {
             style {
                 fontSize = Dimension(1.5, Dimension.LinearUnits.em)
             }
+
+            selectionModel.selectedItemProperty().onChange {
+                function.value = it
+            }
+
+            selectionModel.select(0)
         }
 
         vbox {
@@ -45,6 +54,8 @@ class HelloWorld : View() {
             hgrow = Priority.ALWAYS
 
             label("Simple Echo") {
+                textProperty().bind(function)
+
                 style {
                     fontSize = Dimension(4.0, Dimension.LinearUnits.em)
                     fontWeight = FontWeight.BOLD
@@ -75,6 +86,10 @@ class HelloWorld : View() {
                         backgroundColor += c("#79B0C0")
                         textFill = c("#FFFFFF")
                         fontWeight = FontWeight.BOLD
+                    }
+
+                    action {
+                        controller.downloadFunction(function.value)
                     }
                 }
 
