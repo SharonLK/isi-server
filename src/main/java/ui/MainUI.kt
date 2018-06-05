@@ -33,6 +33,10 @@ class HelloWorld : View() {
             items.add("Ping")
             items.add("Simple Echo")
             items.add("Cat")
+
+            style {
+                fontSize = Dimension(1.5, Dimension.LinearUnits.em)
+            }
         }
 
         vbox {
@@ -57,13 +61,6 @@ class HelloWorld : View() {
             }
 
             separator(Orientation.HORIZONTAL)
-
-            textarea("def handler(st):\n\tprint(\"Hello World\")\n\n") {
-                maxHeightProperty().set(Double.MAX_VALUE)
-                maxWidthProperty().set(Double.MAX_VALUE)
-                vgrow = Priority.ALWAYS
-                font = Font.font("monospace", 16.0)
-            }
 
             separator(Orientation.HORIZONTAL)
 
