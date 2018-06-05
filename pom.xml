@@ -44,6 +44,12 @@
             <artifactId>tornadofx</artifactId>
             <version>1.7.16</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.directory.studio</groupId>
+            <artifactId>org.apache.commons.io</artifactId>
+            <version>2.4</version>
+        </dependency>
     </dependencies>
 
     <build>

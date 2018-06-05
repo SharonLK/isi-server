@@ -1,0 +1,24 @@
+{
+  "functions" : [
+    {
+      "name" : "Simple Echo",
+      "url" : "http://127.0.0.1:8080/function/simple-echo"
+    },
+    {
+      "name" : "Ping",
+      "url" : "http://127.0.0.1:8080/function/ping"
+    },
+    {
+      "name" : "Catty cat",
+      "url" : "http://127.0.0.1:8080/function/catty-cat"
+    },
+    {
+      "name" : "Word Counter",
+      "url" : "http://127.0.0.1:8080/function/word-counter"
+    },
+    {
+      "name" : "DDOS",
+      "url" : "http://127.0.0.1:8080/function/ddoser"
+    }
+  ]
+}
