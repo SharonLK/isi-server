@@ -2,9 +2,14 @@ package server
 
 import com.sun.net.httpserver.HttpServer
 import org.apache.commons.io.IOUtils
+import org.json.simple.JSONObject
+import org.json.simple.parser.JSONParser
 import java.io.BufferedOutputStream
+import java.io.File
+import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.net.InetSocketAddress
+import java.util.zip.ZipInputStream
 
 fun main(args: Array<String>) {
     Communicator().start()
@@ -16,7 +21,12 @@ class Communicator {
     }
 
     fun start() {
+        val parser = JSONParser()
+
         val data = IOUtils.toString(this.javaClass.classLoader.getResource("dummy_data.json"))
+        val config = parser.parse(IOUtils.toString(this.javaClass.classLoader.getResource("config.json"))) as JSONObject
+
+        val mainDirPath = config["path"] as String
 
         val server = HttpServer.create(InetSocketAddress(9091), 0)
         server.createContext("/", { exchange ->
@@ -28,7 +38,12 @@ class Communicator {
         server.createContext("/post", { exchange ->
             println("Receiving message")
 
-            val bos = BufferedOutputStream(FileOutputStream("/home/sharon/a.txt"))
+            val name = exchange.requestHeaders.getFirst("func_name")
+            val replicas = exchange.requestHeaders.getFirst("replicas")
+
+            File("$mainDirPath/$name").mkdirs()
+
+            val bos = BufferedOutputStream(FileOutputStream("$mainDirPath/a.zip"))
             val buff = ByteArray(2048)
             val requestBody = exchange.requestBody
             var c = requestBody.read(buff)
@@ -44,6 +59,28 @@ class Communicator {
             println("Message received")
 
             exchange.sendResponseHeaders(200, 0)
+
+            val zis = ZipInputStream(FileInputStream("$mainDirPath/a.zip"))
+            var zipEntry = zis.nextEntry
+
+            while (zipEntry != null) {
+                val fileName = zipEntry.name
+                val newFile = File("$mainDirPath/$name/$fileName")
+                val fos = FileOutputStream(newFile)
+                var len = zis.read(buff)
+
+                while (len > 0) {
+                    fos.write(buff, 0, len)
+
+                    len = zis.read(buff)
+                }
+
+                fos.close()
+                zipEntry = zis.nextEntry
+            }
+
+            zis.closeEntry()
+            zis.close()
         })
 
         server.executor = null
