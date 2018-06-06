@@ -1,4 +1,4 @@
 package faas
 
-class FaasCliList {
+class FaasCliList (val functionName : String, val invocations : Int, val replicas : Int) {
 }
