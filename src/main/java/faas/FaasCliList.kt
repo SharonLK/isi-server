@@ -1,0 +1,4 @@
+package faas
+
+class FaasCliList {
+}
