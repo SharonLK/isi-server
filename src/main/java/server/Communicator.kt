@@ -76,27 +76,14 @@ class Communicator {
 
         // Unzip the file into a new folder that was created especially for this new function
         val zis = ZipInputStream(FileInputStream("$mainDirPath/a.zip"))
-        zis.entries().forEach({ entry ->
+        var entry = zis.nextEntry
+
+        while (entry != null) {
             val fos = FileOutputStream("$mainDirPath/$name/${entry.name}")
             fos.write(zis.readBytes())
             fos.close()
-        })
+
+            entry = zis.nextEntry
+        }
     }
-}
-
-/**
- * Returns all entries found in this zip file.
- */
-fun ZipInputStream.entries(): List<ZipEntry> {
-    val entries = ArrayList<ZipEntry>()
-    var entry = nextEntry
-
-    // Iterate over all entries, adding one each time
-    while (entry != null) {
-        entries.add(entry)
-
-        entry = nextEntry
-    }
-
-    return entries
 }
