@@ -44,12 +44,12 @@ fun remove(functionName : String){
 
 }
 
-fun build(image : String, lang : String = "python3", name : String) {
-    println(runCommand("sudo faas-cli build --image $image --lang $lang --name $name"))
+fun build(image : String, lang : String = "python3", name : String, handler : String) {
+    println(runCommand("sudo faas-cli build --image $image --lang $lang --name $name --handler $handler"))
 }
 
-fun deploy(image : String, lang : String = "python3", name : String) {
-    println(runCommand("sudo faas-cli deploy --image $image --lang $lang --name $name"))
+fun deploy(image : String, lang : String = "python3", name : String, handler : String) {
+    println(runCommand("sudo faas-cli deploy --image $image --lang $lang --name $name --handler $handler"))
 }
 
 fun buildAndDeploy(image : String, lang : String = "python3", name : String) {
