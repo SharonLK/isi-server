@@ -50,9 +50,9 @@ fun deploy(image : String, lang : String = "python3", name : String, handler : S
     println(runCommand("sudo faas-cli deploy --image $image --lang $lang --name $name --handler $handler"))
 }
 
-fun buildAndDeploy(image: String, lang: String = "python3", name: String) {
-    build(image, lang, name)
-    deploy(image, lang, name)
+fun buildAndDeploy(image: String, lang: String = "python3", name: String, handler : String) {
+    build(image, lang, name, handler)
+    deploy(image, lang, name, handler)
 }
 
 
