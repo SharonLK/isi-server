@@ -10,6 +10,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.net.InetSocketAddress
+import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 
 fun main(args: Array<String>) {
@@ -75,16 +76,27 @@ class Communicator {
 
         // Unzip the file into a new folder that was created especially for this new function
         val zis = ZipInputStream(FileInputStream("$mainDirPath/a.zip"))
-        var zipEntry = zis.nextEntry
-
-        while (zipEntry != null) {
-            val fos = FileOutputStream("$mainDirPath/$name/${zipEntry.name}")
+        zis.entries().forEach({ entry ->
+            val fos = FileOutputStream("$mainDirPath/$name/${entry.name}")
             fos.write(zis.readBytes())
             fos.close()
-
-            zipEntry = zis.nextEntry
-        }
-
-        zis.close()
+        })
     }
+}
+
+/**
+ * Returns all entries found in this zip file.
+ */
+fun ZipInputStream.entries(): List<ZipEntry> {
+    val entries = ArrayList<ZipEntry>()
+    var entry = nextEntry
+
+    // Iterate over all entries, adding one each time
+    while (entry != null) {
+        entries.add(entry)
+
+        entry = nextEntry
+    }
+
+    return entries
 }
