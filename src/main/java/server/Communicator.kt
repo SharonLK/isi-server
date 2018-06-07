@@ -2,7 +2,9 @@ package server
 
 import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpServer
+import faas.list
 import org.apache.commons.io.IOUtils
+import org.json.simple.JSONArray
 import org.json.simple.JSONObject
 import org.json.simple.parser.JSONParser
 import java.io.BufferedOutputStream
@@ -10,7 +12,6 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.net.InetSocketAddress
-import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 
 fun main(args: Array<String>) {
@@ -18,8 +19,8 @@ fun main(args: Array<String>) {
 }
 
 class Communicator {
-    // Contains dummy data that is sent to the client, in the future this will be change to send actual real data
-    private val data = IOUtils.toString(this.javaClass.classLoader.getResource("dummy_data.json"))
+    // Contains function meta data that will be sent to the client
+    private val data: String
 
     // Contains the path to the directory where functions will be stored
     private val mainDirPath: String
@@ -29,6 +30,26 @@ class Communicator {
         val parser = JSONParser()
         val config = parser.parse(IOUtils.toString(this.javaClass.classLoader.getResource("config.json"))) as JSONObject
         mainDirPath = config["path"] as String
+    }
+
+    init {
+        val functions = list()
+        val json = JSONObject()
+        val jsonFunctions = JSONArray()
+
+        // Iterate over all functions and add them to the JSON array
+        functions.forEach({ function ->
+            jsonFunctions.add(JSONObject(hashMapOf(
+                    "name" to function.functionName,
+                    "invocations" to function.invocations,
+                    "replicas" to function.replicas,
+                    "url" to "http://127.0.0.1/function/${function.functionName}"
+            )))
+        })
+
+        json["functions"] = jsonFunctions
+
+        data = json.toJSONString()
     }
 
     fun start() {
