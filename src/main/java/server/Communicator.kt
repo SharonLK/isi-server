@@ -3,16 +3,15 @@ package server
 import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpServer
 import faas.list
+import net.lingala.zip4j.core.ZipFile
 import org.apache.commons.io.IOUtils
 import org.json.simple.JSONArray
 import org.json.simple.JSONObject
 import org.json.simple.parser.JSONParser
 import java.io.BufferedOutputStream
 import java.io.File
-import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.net.InetSocketAddress
-import java.util.zip.ZipInputStream
 
 fun main(args: Array<String>) {
     Communicator().start()
@@ -96,15 +95,7 @@ class Communicator {
         exchange.sendResponseHeaders(200, 0)
 
         // Unzip the file into a new folder that was created especially for this new function
-        val zis = ZipInputStream(FileInputStream("$mainDirPath/a.zip"))
-        var entry = zis.nextEntry
-
-        while (entry != null) {
-            val fos = FileOutputStream("$mainDirPath/$name/${entry.name}")
-            fos.write(zis.readBytes())
-            fos.close()
-
-            entry = zis.nextEntry
-        }
+        val zf = ZipFile("$mainDirPath/a.zip")
+        zf.extractAll("$mainDirPath/$name/")
     }
 }
