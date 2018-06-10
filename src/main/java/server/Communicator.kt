@@ -4,13 +4,13 @@ import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpServer
 import faas.list
 import net.lingala.zip4j.core.ZipFile
+import net.lingala.zip4j.model.ZipParameters
+import net.lingala.zip4j.util.Zip4jConstants
 import org.apache.commons.io.IOUtils
 import org.json.simple.JSONArray
 import org.json.simple.JSONObject
 import org.json.simple.parser.JSONParser
-import java.io.BufferedOutputStream
-import java.io.File
-import java.io.FileOutputStream
+import java.io.*
 import java.net.InetSocketAddress
 
 fun main(args: Array<String>) {
@@ -56,6 +56,7 @@ class Communicator {
         val server = HttpServer.create(InetSocketAddress(9091), 0)
         server.createContext("/", this::handleSendData)
         server.createContext("/post", this::handleReceiveZip)
+        server.createContext("/download", this::handleDownload)
 
         server.executor = null
         server.start()
@@ -72,7 +73,7 @@ class Communicator {
     }
 
     /**
-     * Handlers POST requests from the client for deployment of new functions
+     * Handles POST requests from the client for deployment of new functions
      */
     private fun handleReceiveZip(exchange: HttpExchange) {
         println("Receiving message")
@@ -97,5 +98,37 @@ class Communicator {
         // Unzip the file into a new folder that was created especially for this new function
         val zf = ZipFile("$mainDirPath/a.zip")
         zf.extractAll("$mainDirPath/$name/")
+    }
+
+    /**
+     * Handles GET requests from the client asking to download a certain function. The function is packaged into a ZIP
+     * file and sent back to the client.
+     */
+    private fun handleDownload(exchange: HttpExchange) {
+        println("Receiving /download message")
+
+        // Parse headers
+        val name = exchange.requestHeaders.getFirst("name")
+
+        val zf = ZipFile("$mainDirPath/a.zip")
+        val params = ZipParameters()
+        params.compressionLevel = Zip4jConstants.COMP_DEFLATE
+        params.isIncludeRootFolder = false
+        zf.addFolder("$mainDirPath/$name", params)
+
+        // Send response to the client that the file has been received successfully
+        exchange.sendResponseHeaders(200, 0)
+
+        val responseStream = exchange.responseBody
+        val fis = FileInputStream("$mainDirPath/a.zip")
+        val bis = BufferedInputStream(fis)
+
+        responseStream.write(bis.readBytes())
+
+        bis.close()
+        fis.close()
+        responseStream.close()
+
+        File("$mainDirPath/a.zip").delete()
     }
 }
