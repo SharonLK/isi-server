@@ -17,11 +17,16 @@ import java.io.InputStreamReader
 fun main(args: Array<String>) {
     val faasList = list()
     faasList.forEach {
-        print("${it.functionName}\t${it.invocations}\t${it.replicas}\n")
+        //print("${it.functionName}\t${it.invocations}\t${it.replicas}\n")
     }
+    val url = deploy("test", "python3" , "testing",
+            "/home/iron-faas/projects/faas-cli/sample/tests/handler.py")
+    println(url.toString())
 }
 
 data class FaasCliList (val functionName : String, val invocations : Int, val replicas : Int)
+
+data class FaasCliDeploy (val url: String?)
 
 fun list(): List<FaasCliList> {
     val listString = runCommand("faas-cli list")
@@ -38,7 +43,7 @@ fun list(): List<FaasCliList> {
 }
 
 fun remove(functionName: String) {
-    println(runCommand("faas-cli remove $functionName`"))
+    println(runCommand("faas-cli remove $functionName"))
 
 }
 
@@ -46,13 +51,19 @@ fun build(image : String, lang : String = "python3", name : String, handler : St
     println(runCommand("sudo faas-cli build --image $image --lang $lang --name $name --handler $handler"))
 }
 
-fun deploy(image : String, lang : String = "python3", name : String, handler : String) {
-    println(runCommand("sudo faas-cli deploy --image $image --lang $lang --name $name --handler $handler"))
+fun deploy(image : String, lang : String = "python3", name : String, handler : String) : FaasCliDeploy{
+    var deploy : String = runCommand("sudo faas-cli deploy --image $image --lang $lang --name $name" +
+            " --handler $handler")
+    val indexOfUrl = deploy.indexOf("URL:")
+    if(indexOfUrl != -1 && indexOfUrl+4 < deploy.length-1)  {
+        return FaasCliDeploy(deploy.substring(indexOfUrl+5))
+    }
+    return FaasCliDeploy(null)
 }
 
-fun buildAndDeploy(image: String, lang: String = "python3", name: String, handler : String) {
+fun buildAndDeploy(image: String, lang: String = "python3", name: String, handler : String) : FaasCliDeploy {
     build(image, lang, name, handler)
-    deploy(image, lang, name, handler)
+    return deploy(image, lang, name, handler)
 }
 
 
