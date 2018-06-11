@@ -15,6 +15,7 @@ import org.json.simple.JSONObject
 import org.json.simple.parser.JSONParser
 import java.io.*
 import java.net.InetSocketAddress
+import faas.*
 
 fun main(args: Array<String>) {
     Communicator().start()
@@ -131,7 +132,6 @@ class Communicator {
 
         // Parse headers
         val name = exchange.requestHeaders.getFirst("func_name")
-        val replicas = exchange.requestHeaders.getFirst("replicas")
 
         // Make directories needed for the new function
         File("$mainDirPath/$name").mkdirs()
@@ -149,7 +149,34 @@ class Communicator {
         // Unzip the file into a new folder that was created especially for this new function
         val zf = ZipFile("$mainDirPath/a.zip")
         zf.extractAll("$mainDirPath/$name/")
+
+        /**
+        * Build and Deploy the functions that we extract
+         */
+        println(buildAndDeploy(name, "python3", name,"$mainDirPath/$name/"))
+
     }
+
+    private fun handleRemove(exchange: HttpExchange) {
+        println("Removing function")
+
+        // Parse headers
+        val name = exchange.requestHeaders.getFirst("func_name")
+
+        // Remove directories that belong to the function
+        if (File("$mainDirPath/$name").deleteRecursively()) {
+            println("Function successfully removed!")
+            // Send response to the client that the file has been removed successfully
+            exchange.sendResponseHeaders(200, 0)
+        }
+        else{
+            println("Failed to remove function.")
+            // Send response to the client that the file hasn't been removed.
+            exchange.sendResponseHeaders(400, 0)
+        }
+    }
+
+
 
     /**
      * Handles GET requests from the client asking to download a certain function. The function is packaged into a ZIP
