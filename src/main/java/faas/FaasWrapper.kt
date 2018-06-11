@@ -43,8 +43,7 @@ fun list(): List<FaasCliList> {
 }
 
 fun remove(functionName: String) {
-    println(runCommand("faas-cli remove $functionName"))
-
+    println(runCommand("sudo faas-cli remove $functionName"))
 }
 
 fun build(image : String, lang : String = "python3", name : String, handler : String) {
