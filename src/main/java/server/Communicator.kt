@@ -39,6 +39,7 @@ class Communicator {
         server.createContext("/post", this::handleReceiveZip)
         server.createContext("/download", this::handleDownload)
         server.createContext("/resubmit", this::handleReSubmit)
+        server.createContext("/remove", this::handleRemove)
 
         server.executor = null
         server.start()
@@ -161,7 +162,9 @@ class Communicator {
         println("Removing function")
 
         // Parse headers
-        val name = exchange.requestHeaders.getFirst("func_name")
+        val name = exchange.requestHeaders.getFirst("name")
+
+        remove(name)
 
         // Remove directories that belong to the function
         if (File("$mainDirPath/$name").deleteRecursively()) {
