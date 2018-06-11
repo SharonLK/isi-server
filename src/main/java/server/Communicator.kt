@@ -2,10 +2,13 @@ package server
 
 import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpServer
+import faas.buildAndDeploy
 import faas.list
+import faas.remove
 import net.lingala.zip4j.core.ZipFile
 import net.lingala.zip4j.model.ZipParameters
 import net.lingala.zip4j.util.Zip4jConstants
+import org.apache.commons.io.FileUtils
 import org.apache.commons.io.IOUtils
 import org.json.simple.JSONArray
 import org.json.simple.JSONObject
@@ -25,7 +28,7 @@ class Communicator {
         // Parse the main directory path from the config.json file
         val parser = JSONParser()
         val config = parser.parse(IOUtils.toString(this.javaClass.classLoader.getResource("config.json"))) as JSONObject
-        mainDirPath = config["path"] as String
+        mainDirPath = (config["path"] as String).replaceFirst("^~".toRegex(), System.getProperty("user.home"))
     }
 
     fun start() {
@@ -34,6 +37,7 @@ class Communicator {
         server.createContext("/", this::handleSendData)
         server.createContext("/post", this::handleReceiveZip)
         server.createContext("/download", this::handleDownload)
+        server.createContext("/resubmit", this::handleReSubmit)
 
         server.executor = null
         server.start()
@@ -89,6 +93,34 @@ class Communicator {
         val body = exchange.responseBody
         body.write(data.toByteArray())
         body.close()
+    }
+
+    private fun handleReSubmit(exchange: HttpExchange) {
+        println("Receiving message")
+
+        // Parse headers
+        val name = exchange.requestHeaders.getFirst("name")
+
+        // Read the send ZIP file into a local file on this server that will be stored in '$mainDirPath/a.zip'
+        val bos = BufferedOutputStream(FileOutputStream("$mainDirPath/a.zip"))
+        bos.write(exchange.requestBody.readBytes())
+        bos.close()
+
+        println("Message received")
+
+        // Send response to the client that the file has been received successfully
+        exchange.sendResponseHeaders(200, 0)
+
+        // Remove the docker container, the whole directory and then create an empty directory instead
+        remove(name)
+        FileUtils.deleteDirectory(File("$mainDirPath/$name/"))
+        File("$mainDirPath/$name").mkdirs()
+
+        // Unzip the file into a new folder that was created especially for this new function
+        val zf = ZipFile("$mainDirPath/a.zip")
+        zf.extractAll("$mainDirPath/$name/")
+
+        buildAndDeploy(name, "python3", name, "$mainDirPath/$name/")
     }
 
     /**
