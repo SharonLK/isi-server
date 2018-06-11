@@ -18,9 +18,6 @@ fun main(args: Array<String>) {
 }
 
 class Communicator {
-    // Contains function meta data that will be sent to the client
-    private val data: String
-
     // Contains the path to the directory where functions will be stored
     private val mainDirPath: String
 
@@ -31,7 +28,38 @@ class Communicator {
         mainDirPath = config["path"] as String
     }
 
-    init {
+    fun start() {
+        // Open a local server on port 9091 and add two basic handlers
+        val server = HttpServer.create(InetSocketAddress(9091), 0)
+        server.createContext("/", this::handleSendData)
+        server.createContext("/post", this::handleReceiveZip)
+        server.createContext("/download", this::handleDownload)
+
+        server.executor = null
+        server.start()
+    }
+
+    /**
+     * Retrieves data of currently deployed functions and packages it in a JSON format with the following structure:
+     *
+     *  {
+     *      functions: [
+     *          {
+     *              name: <name#1>
+     *              invocations: <invocations#1>
+     *              replicas: <replicas#1>
+     *              url: <url#1>
+     *          },
+     *          {
+     *              name: <name#1>
+     *              invocations: <invocations#1>
+     *              replicas: <replicas#1>
+     *              url: <url#1>
+     *          }
+     *      ]
+     *  }
+     */
+    private fun functionsData(): String {
         val functions = list()
         val json = JSONObject()
         val jsonFunctions = JSONArray()
@@ -48,24 +76,15 @@ class Communicator {
 
         json["functions"] = jsonFunctions
 
-        data = json.toJSONString()
-    }
-
-    fun start() {
-        // Open a local server on port 9091 and add two basic handlers
-        val server = HttpServer.create(InetSocketAddress(9091), 0)
-        server.createContext("/", this::handleSendData)
-        server.createContext("/post", this::handleReceiveZip)
-        server.createContext("/download", this::handleDownload)
-
-        server.executor = null
-        server.start()
+        return json.toJSONString()
     }
 
     /**
      * Handlers initial GET requests from the client and sends them currently deployed functions
      */
     private fun handleSendData(exchange: HttpExchange) {
+        val data = functionsData()
+
         exchange.sendResponseHeaders(200, data.length.toLong())
         val body = exchange.responseBody
         body.write(data.toByteArray())
