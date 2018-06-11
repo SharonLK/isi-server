@@ -12,6 +12,7 @@ import org.json.simple.JSONObject
 import org.json.simple.parser.JSONParser
 import java.io.*
 import java.net.InetSocketAddress
+import faas.*
 
 fun main(args: Array<String>) {
     Communicator().start()
@@ -57,6 +58,7 @@ class Communicator {
         server.createContext("/", this::handleSendData)
         server.createContext("/post", this::handleReceiveZip)
         server.createContext("/download", this::handleDownload)
+        //server.createContext("/remove", this::handleRemove)
 
         server.executor = null
         server.start()
@@ -80,7 +82,6 @@ class Communicator {
 
         // Parse headers
         val name = exchange.requestHeaders.getFirst("func_name")
-        val replicas = exchange.requestHeaders.getFirst("replicas")
 
         // Make directories needed for the new function
         File("$mainDirPath/$name").mkdirs()
@@ -98,6 +99,12 @@ class Communicator {
         // Unzip the file into a new folder that was created especially for this new function
         val zf = ZipFile("$mainDirPath/a.zip")
         zf.extractAll("$mainDirPath/$name/")
+
+        /**
+        * Build and Deploy the functions that we extract
+         */
+        println(buildAndDeploy(name, "python3", name,"$mainDirPath/$name/"))
+
     }
 
     /**
