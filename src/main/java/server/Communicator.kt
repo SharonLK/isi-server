@@ -58,7 +58,7 @@ class Communicator {
         server.createContext("/", this::handleSendData)
         server.createContext("/post", this::handleReceiveZip)
         server.createContext("/download", this::handleDownload)
-        //server.createContext("/remove", this::handleRemove)
+        server.createContext("/remove", this::handleRemove)
 
         server.executor = null
         server.start()
@@ -106,6 +106,27 @@ class Communicator {
         println(buildAndDeploy(name, "python3", name,"$mainDirPath/$name/"))
 
     }
+
+    private fun handleRemove(exchange: HttpExchange) {
+        println("Removing function")
+
+        // Parse headers
+        val name = exchange.requestHeaders.getFirst("func_name")
+
+        // Remove directories that belong to the function
+        if (File("$mainDirPath/$name").deleteRecursively()) {
+            println("Function successfully removed!")
+            // Send response to the client that the file has been removed successfully
+            exchange.sendResponseHeaders(200, 0)
+        }
+        else{
+            println("Failed to remove function.")
+            // Send response to the client that the file hasn't been removed.
+            exchange.sendResponseHeaders(400, 0)
+        }
+    }
+
+
 
     /**
      * Handles GET requests from the client asking to download a certain function. The function is packaged into a ZIP
