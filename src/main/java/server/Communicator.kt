@@ -132,7 +132,7 @@ class Communicator {
         println("Receiving message")
 
         // Parse headers
-        val name = exchange.requestHeaders.getFirst("func_name")
+        val name = exchange.requestHeaders.getFirst("name")
 
         // Make directories needed for the new function
         File("$mainDirPath/$name").mkdirs()
